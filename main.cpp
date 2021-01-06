@@ -67,11 +67,11 @@ public:
 
 class Sphere {
 public:
-    Sphere(const Vector& O, double R): O(O), R(R) {
+    Sphere(const Vector& O, double R, const Vector& albedo): O(O), R(R), albedo(albedo) {
 
     }
     // P intersection point, N normal vector
-    bool intersect(const Ray& r, Vector& P, Vector& N) {
+    bool intersect(const Ray& r, Vector& P, Vector& N, double &t) {
        // solves a*t^2 + b*t + c = 0
        double a = 1;
        double b = 2*dot(r.u, r.C - O);
@@ -85,7 +85,6 @@ public:
 
        if (t2 < 0) return false;
 
-       double t;
        double t1 = (-b - sqDelta) / (2*a);
        if (t1 > 0)
            t = t1;
@@ -97,9 +96,32 @@ public:
 
        return true;
     }
-private:
     Vector O;
     double R;
+    Vector albedo;
+};
+
+class Scene {
+    public:
+    Scene() {};
+    bool intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo) {
+        double t = 1E10;
+        bool hasInter = false;
+        for (int i = 0; i<objects.size(); i++) {
+            Vector localP, localN;
+            double localt;
+            if (objects[i].intersect(r, localP, localN, localt) && localt < t) {
+               t = localt;
+               hasInter = true;
+               albedo = objects[i].albedo;
+               P = localP;
+               N = localN; 
+            }
+        }
+
+        return hasInter;
+    }
+    std::vector<Sphere> objects;
 };
 
 int main() {
@@ -107,13 +129,14 @@ int main() {
     int H = 512;
 
     Vector C(0, 0, 55);
-    Vector O(0, 0, 0);
-    double R = 10;
-
-    Sphere S(O, R);
+    Scene scene;
+    Sphere S1(Vector(0, 0, 0), 10, Vector(1, 0., 0.));
+    Sphere S2(Vector(8, 0, 0), 10, Vector(0., 0., 1.));
+    scene.objects.push_back(S1);
+    scene.objects.push_back(S2);
     // angle in rad
-    double fov = 80*M_PI/180;
-    double I = 1E9;
+    double fov = 60*M_PI/180;
+    double I = 1E7;
     Vector rho(1, 0, 0);
     Vector L(-10, 20, 40);
 
@@ -127,19 +150,19 @@ int main() {
 
             Ray r(C, u);
 
-            Vector P, N;
-            bool inter = S.intersect(r, P, N);
+            Vector P, N, albedo;
+            bool inter = scene.intersect(r, P, N, albedo);
             Vector color(0, 0, 0);
 
             if (inter) {
                 Vector PL = L - P;
                 double d = sqrt(PL.sqrNorm());
-                color = I/(4*M_PI*d*d)*rho/M_PI*std::max(0., dot(N, PL/d));
+                color = I/(4*M_PI*d*d)*albedo/M_PI*std::max(0., dot(N, PL/d));
             }
 
-            image[((H-i-1)*W + j)* 3 + 0] = std::max(255.0, color[0]);
-            image[((H-i-1)*W + j)* 3 + 1] = std::max(255.0, color[1]);
-            image[((H-i-1)*W + j)* 3 + 2] = std::max(255.0, color[2]);
+            image[((H - i - 1)*W + j)* 3 + 0] = std::min(255.0, color[0]);
+            image[((H - i - 1)*W + j)* 3 + 1] = std::min(255.0, color[1]);
+            image[((H - i - 1)*W + j)* 3 + 2] = std::min(255.0, color[2]);
         }
     }
     stbi_write_png("image.png", W, H, 3, &image[0], 0);
