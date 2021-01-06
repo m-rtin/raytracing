@@ -7,8 +7,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-#define M_PI 3.14159265359
-
 class Vector {
 public:
     explicit Vector (double x=0, double y=0, double z=0) {
@@ -37,6 +35,10 @@ Vector operator+(const Vector &a, const Vector &b) {
     return Vector(a[0] + b[0], a[1] + b[1], a[2] + b[2]);
 }
 
+Vector operator-(const Vector &a, const Vector &b) {
+    return Vector(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+}
+
 Vector operator*(double a, const Vector &b) {
     return Vector(a*b[0], a*b[1], a*b[2]);
 }
@@ -49,25 +51,35 @@ double dot(const Vector &a, const Vector &b) {
     return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
 }
 
-class Sphere {
-public:
-    Sphere(const Vector& O, double R): O(O), R(R) {
-
-    }
-private:
-    Vector O;
-    double R;
-};
-
 class Ray {
 public:
     Ray(const Vector& C, const Vector& u): C(C), u(u) {
 
     }
 
-private:
     Vector C, u;
 };
+
+class Sphere {
+public:
+    Sphere(const Vector& O, double R): O(O), R(R) {
+
+    }
+    bool intersect(const Ray& r) {
+       // solves a*t^2 + b*t + c = 0
+       double a = 1;
+       double b = 2*dot(r.u, r.C - O);
+       double c = (r.C-O).sqrNorm() - R*R;
+       double delta = b*b - 4*a*c;
+
+       return delta >= 0;
+    }
+private:
+    Vector O;
+    double R;
+};
+
+
 
 int main() {
     int W = 512;
@@ -86,11 +98,19 @@ int main() {
         for (int j = 0; j < W; j++) {
 
             Vector u(j - W/2, i - H/2, -W/(2.*tan(fov/2)));
+            u = u.getNormalized();
             Ray r(C, u);
 
-            image[(i*W + j) * 3 + 0] = 255;
-            image[(i*W + j) * 3 + 1] = 100;
-            image[(i*W + j) * 3 + 2] = 0;
+            bool inter = S.intersect(r);
+            Vector color(0, 0, 0);
+
+            if (inter) {
+                color = Vector(255, 255, 255);
+            }
+
+            image[(i*W + j) * 3 + 0] = color[0];
+            image[(i*W + j) * 3 + 1] = color[1];
+            image[(i*W + j) * 3 + 2] = color[2];
         }
     }
     stbi_write_png("image.png", W, H, 3, &image[0], 0);
