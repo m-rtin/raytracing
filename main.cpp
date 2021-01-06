@@ -8,10 +8,10 @@
 #include "stb_image.h"
 
 #include <algorithm>
-#include "Vector.h"
-#include "Ray.h"
-#include "Sphere.h"
-#include "Scene.h"
+#include "Models/Vector.h"
+#include "Models/Ray.h"
+#include "Models/Sphere.h"
+#include "Models/Scene.h"
 
 
 int main() {
@@ -19,14 +19,17 @@ int main() {
     int H = 512;
 
     Vector C(0, 0, 55);
+
     Scene scene;
     Sphere S1(Vector(0, 0, 0), 10, Vector(1, 0., 0.));
-    Sphere S2(Vector(8, 0, 0), 10, Vector(0., 0., 1.));
+    Sphere S2(Vector(18, 0, 0), 10, Vector(0., 0., 1.));
     scene.objects.push_back(S1);
     scene.objects.push_back(S2);
+
     // angle in rad
     double fov = 60*M_PI/180;
     double I = 1E7;
+
     Vector rho(1, 0, 0);
     Vector L(-10, 20, 40);
 

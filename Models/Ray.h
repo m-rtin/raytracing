@@ -8,9 +8,13 @@
 #include "Vector.h"
 
 class Ray {
+
 public:
     Ray(const Vector& C, const Vector& u);
-    Vector C, u;
+    // camera position
+    Vector C;
+    // direction vector
+    Vector u;
 };
 
 
