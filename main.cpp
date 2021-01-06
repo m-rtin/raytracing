@@ -18,16 +18,20 @@ int main() {
     int W = 512;
     int H = 512;
 
+    // camera position
     Vector C(0, 0, 55);
 
+    // Create a scene
     Scene scene;
-    Sphere S1(Vector(0, 0, 0), 10, Vector(1, 0., 0.));
-    Sphere S2(Vector(18, 0, 0), 10, Vector(0., 0., 1.));
+    Sphere S1(Vector(-10, 10, 0), 10, Vector(1, 0., 0.));
+    Sphere S2(Vector(10, -10, 0), 10, Vector(1., 0., 1.));
     scene.objects.push_back(S1);
     scene.objects.push_back(S2);
 
-    // angle in rad
+    // camera angle in rad
     double fov = 60*M_PI/180;
+
+    // light intensity
     double I = 1E7;
 
     Vector rho(1, 0, 0);
@@ -37,17 +41,18 @@ int main() {
     for (int i = 0; i < H; i++) {
         for (int j = 0; j < W; j++) {
 
-            // create direction vector
+            // create ray from pixel coordinates
             Vector u(j - W/2, i - H/2, -W/(2.*tan(fov/2)));
             u = u.getNormalized();
-
             Ray r(C, u);
 
+            // check if ray intersects with an object in the scene
             Vector P, N, albedo;
             bool inter = scene.intersect(r, P, N, albedo);
             Vector color(0, 0, 0);
 
             if (inter) {
+                // Lambertian model for shadows
                 Vector PL = L - P;
                 double d = sqrt(PL.sqrNorm());
                 color = I/(4*M_PI*d*d)*albedo/M_PI*std::max(0., dot(N, PL/d));
@@ -58,7 +63,7 @@ int main() {
             image[((H - i - 1)*W + j)* 3 + 2] = std::min(255.0, color[2]);
         }
     }
-    stbi_write_png("image.png", W, H, 3, &image[0], 0);
+    stbi_write_png("image2.png", W, H, 3, &image[0], 0);
 
     return 0;
 }
