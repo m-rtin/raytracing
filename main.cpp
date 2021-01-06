@@ -7,6 +7,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include <algorithm>
+
 class Vector {
 public:
     explicit Vector (double x=0, double y=0, double z=0) {
@@ -47,6 +49,9 @@ Vector operator*(const Vector &a, double b) {
     return Vector(b*a[0], b*a[1], b*a[2]);
 }
 
+Vector operator/(const Vector &a, double b) {
+    return Vector(a[0]/b, a[1]/b, a[2]/b);
+}
 double dot(const Vector &a, const Vector &b) {
     return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
 }
@@ -65,21 +70,37 @@ public:
     Sphere(const Vector& O, double R): O(O), R(R) {
 
     }
-    bool intersect(const Ray& r) {
+    // P intersection point, N normal vector
+    bool intersect(const Ray& r, Vector& P, Vector& N) {
        // solves a*t^2 + b*t + c = 0
        double a = 1;
        double b = 2*dot(r.u, r.C - O);
        double c = (r.C-O).sqrNorm() - R*R;
        double delta = b*b - 4*a*c;
 
-       return delta >= 0;
+       if (delta < 0) return false;
+
+       double sqDelta = sqrt(delta);
+       double t2 = (-b + sqDelta) / (2*a);
+
+       if (t2 < 0) return false;
+
+       double t;
+       double t1 = (-b - sqDelta) / (2*a);
+       if (t1 > 0)
+           t = t1;
+       else
+           t = t2;
+
+       P = r.C + t*r.u;
+       N = (P - O).getNormalized();
+
+       return true;
     }
 private:
     Vector O;
     double R;
 };
-
-
 
 int main() {
     int W = 512;
@@ -90,27 +111,35 @@ int main() {
     double R = 10;
 
     Sphere S(O, R);
-    double fov = 60*M_PI/180;
-
+    // angle in rad
+    double fov = 80*M_PI/180;
+    double I = 1E9;
+    Vector rho(1, 0, 0);
+    Vector L(-10, 20, 40);
 
     std::vector<unsigned char> image(W*H * 3, 0);
     for (int i = 0; i < H; i++) {
         for (int j = 0; j < W; j++) {
 
+            // create direction vector
             Vector u(j - W/2, i - H/2, -W/(2.*tan(fov/2)));
             u = u.getNormalized();
+
             Ray r(C, u);
 
-            bool inter = S.intersect(r);
+            Vector P, N;
+            bool inter = S.intersect(r, P, N);
             Vector color(0, 0, 0);
 
             if (inter) {
-                color = Vector(255, 255, 255);
+                Vector PL = L - P;
+                double d = sqrt(PL.sqrNorm());
+                color = I/(4*M_PI*d*d)*rho/M_PI*std::max(0., dot(N, PL/d));
             }
 
-            image[(i*W + j) * 3 + 0] = color[0];
-            image[(i*W + j) * 3 + 1] = color[1];
-            image[(i*W + j) * 3 + 2] = color[2];
+            image[((H-i-1)*W + j)* 3 + 0] = std::max(255.0, color[0]);
+            image[((H-i-1)*W + j)* 3 + 1] = std::max(255.0, color[1]);
+            image[((H-i-1)*W + j)* 3 + 2] = std::max(255.0, color[2]);
         }
     }
     stbi_write_png("image.png", W, H, 3, &image[0], 0);
