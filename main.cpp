@@ -9,76 +9,10 @@
 
 #include <algorithm>
 #include "Vector.h"
+#include "Ray.h"
+#include "Sphere.h"
+#include "Scene.h"
 
-
-
-class Ray {
-public:
-    Ray(const Vector& C, const Vector& u): C(C), u(u) {
-
-    }
-
-    Vector C, u;
-};
-
-class Sphere {
-public:
-    Sphere(const Vector& O, double R, const Vector& albedo): O(O), R(R), albedo(albedo) {
-
-    }
-    // P intersection point, N normal vector
-    bool intersect(const Ray& r, Vector& P, Vector& N, double &t) {
-       // solves a*t^2 + b*t + c = 0
-       double a = 1;
-       double b = 2*dot(r.u, r.C - O);
-       double c = (r.C-O).sqrNorm() - R*R;
-       double delta = b*b - 4*a*c;
-
-       if (delta < 0) return false;
-
-       double sqDelta = sqrt(delta);
-       double t2 = (-b + sqDelta) / (2*a);
-
-       if (t2 < 0) return false;
-
-       double t1 = (-b - sqDelta) / (2*a);
-       if (t1 > 0)
-           t = t1;
-       else
-           t = t2;
-
-       P = r.C + t*r.u;
-       N = (P - O).getNormalized();
-
-       return true;
-    }
-    Vector O;
-    double R;
-    Vector albedo;
-};
-
-class Scene {
-    public:
-    Scene() {};
-    bool intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo) {
-        double t = 1E10;
-        bool hasInter = false;
-        for (int i = 0; i<objects.size(); i++) {
-            Vector localP, localN;
-            double localt;
-            if (objects[i].intersect(r, localP, localN, localt) && localt < t) {
-               t = localt;
-               hasInter = true;
-               albedo = objects[i].albedo;
-               P = localP;
-               N = localN; 
-            }
-        }
-
-        return hasInter;
-    }
-    std::vector<Sphere> objects;
-};
 
 int main() {
     int W = 512;
