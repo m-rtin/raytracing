@@ -61,7 +61,7 @@ int main() {
                 Ray shadowRay(P, PL/d);
                 bool shadowInter = scene.intersect(shadowRay, shadowP, shadowN, shadowAlbedo, shadowt);
                 if (shadowInter && shadowt < d) {
-                    color = Vector(0., 0., 0.)
+                    color = Vector(0., 0., 0.);
                 } else {
                     color = I/(4*M_PI*d*d)*albedo/M_PI*std::max(0., dot(N, PL/d));
                 }
@@ -72,7 +72,7 @@ int main() {
             image[((H - i - 1)*W + j)* 3 + 2] = std::min(255.0, pow(color[2], 0.45));
         }
     }
-    stbi_write_png("image3_gamma_correction.png", W, H, 3, &image[0], 0);
+    stbi_write_png("image4_with_shadows.png", W, H, 3, &image[0], 0);
 
     return 0;
 }

@@ -19,7 +19,7 @@ Scene::Scene() {};
  * @return true if the input ray intersects with at least one of the spheres in the scene
  */
 bool Scene::intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo, double &t) {
-    double t = 1E10;
+    t = 1E10;
     bool hasInter = false;
 
     for (int i = 0; i<objects.size(); i++) {
