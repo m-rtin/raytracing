@@ -24,9 +24,23 @@ int main() {
     // Create a scene
     Scene scene;
     Sphere S1(Vector(-10, 10, 0), 10, Vector(1, 0., 0.));
-    Sphere S2(Vector(10, -10, 0), 10, Vector(1., 0., 1.));
+    Sphere S2(Vector(10, 20, 0), 3, Vector(1., 0., 1.));
+
+    Sphere sol(Vector(0, -1000, 0), 990, Vector(1., 1., 1.));
+    Sphere wall1(Vector(-1000, 0, 0), 940, Vector(1., 0., 0.));
+    Sphere wall2(Vector(1000, 0, 0), 940, Vector(0., 1., 0.));
+    Sphere wall3(Vector(0, 0, -1000), 940, Vector(0., 0., 1.));
+    Sphere wall4(Vector(0, 0, 1000), 940, Vector(1., 1., 0.));
+    Sphere plafond(Vector(0, 1000, 0), 940, Vector(1., 1., 1.));
+
     scene.objects.push_back(S1);
     scene.objects.push_back(S2);
+    scene.objects.push_back(sol);
+    scene.objects.push_back(wall1);
+    scene.objects.push_back(wall2);
+    scene.objects.push_back(wall3);
+    scene.objects.push_back(wall4);
+    scene.objects.push_back(plafond);
 
     // camera angle in rad
     double fov = 60*M_PI/180;
@@ -58,7 +72,7 @@ int main() {
                 double d = sqrt(PL.sqrNorm());
                 Vector shadowP, shadowN, shadowAlbedo;
                 double shadowt;
-                Ray shadowRay(P, PL/d);
+                Ray shadowRay(P + 0.001*N, PL/d);
                 bool shadowInter = scene.intersect(shadowRay, shadowP, shadowN, shadowAlbedo, shadowt);
                 if (shadowInter && shadowt < d) {
                     color = Vector(0., 0., 0.);
