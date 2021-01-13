@@ -65,7 +65,7 @@ Vector Scene::getColor(const Ray& r, int rebound) {
             Vector shadowP, shadowN, shadowAlbedo;
             double shadowt;
             Ray shadowRay(P + 0.001*N, PL/d);
-            bool shadowInter = intersect(shadowRay, shadowP, shadowN, shadowAlbedo, shadowMirror, shadowt);
+            bool shadowInter = intersect(shadowRay, shadowP, shadowN, shadowAlbedo, mirror, shadowt);
             if (shadowInter && shadowt < d) {
                 color = Vector(0., 0., 0.);
             } else {

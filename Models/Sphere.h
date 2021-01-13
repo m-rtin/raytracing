@@ -10,7 +10,7 @@
 
 class Sphere {
 public:
-    Sphere(const Vector& O, double R, const Vector& albedo);
+    Sphere(const Vector& O, double R, const Vector& albedo, bool isMirror=false);
     bool intersect(const Ray& r, Vector& P, Vector& N, double &t);
     // center of the sphere
     Vector O;
@@ -18,6 +18,7 @@ public:
     double R;
     // color of the sphere
     Vector albedo;
+    bool isMirror;
 };
 
 

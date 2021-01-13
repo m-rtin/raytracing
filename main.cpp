@@ -49,7 +49,7 @@ int main() {
     scene. I = 5E9;
 
     Vector rho(1, 0, 0);
-    scene.L = (-10, 20, 40);
+    scene.L = Vector(-10, 20, 40);
 
     std::vector<unsigned char> image(W*H * 3, 0);
     for (int i = 0; i < H; i++) {
@@ -66,7 +66,7 @@ int main() {
             image[((H - i - 1)*W + j)* 3 + 2] = std::min(255.0, pow(color[2], 0.45));
         }
     }
-    stbi_write_png("image4_with_shadows.png", W, H, 3, &image[0], 0);
+    stbi_write_png("image5_with_reflections.png", W, H, 3, &image[0], 0);
 
     return 0;
 }
