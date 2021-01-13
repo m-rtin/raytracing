@@ -23,7 +23,7 @@ int main() {
 
     // Create a scene
     Scene scene;
-    Sphere S1(Vector(-10, 10, 0), 10, Vector(1, 0., 0.));
+    Sphere S1(Vector(-10, 10, 0), 10, Vector(1, 0., 0.), true);
     Sphere S2(Vector(10, 20, 0), 3, Vector(1., 0., 1.));
 
     Sphere sol(Vector(0, -1000, 0), 990, Vector(1., 1., 1.));
@@ -46,10 +46,10 @@ int main() {
     double fov = 60*M_PI/180;
 
     // light intensity
-    double I = 5E9;
+    scene. I = 5E9;
 
     Vector rho(1, 0, 0);
-    Vector L(-10, 20, 40);
+    scene.L = (-10, 20, 40);
 
     std::vector<unsigned char> image(W*H * 3, 0);
     for (int i = 0; i < H; i++) {
@@ -59,27 +59,7 @@ int main() {
             Vector u(j - W/2, i - H/2, -W/(2.*tan(fov/2)));
             u = u.getNormalized();
             Ray r(C, u);
-
-            // check if ray intersects with an object in the scene
-            Vector P, N, albedo;
-            double t;
-            bool inter = scene.intersect(r, P, N, albedo, t);
-            Vector color(0, 0, 0);
-
-            if (inter) {
-                // Lambertian model for shadows
-                Vector PL = L - P;
-                double d = sqrt(PL.sqrNorm());
-                Vector shadowP, shadowN, shadowAlbedo;
-                double shadowt;
-                Ray shadowRay(P + 0.001*N, PL/d);
-                bool shadowInter = scene.intersect(shadowRay, shadowP, shadowN, shadowAlbedo, shadowt);
-                if (shadowInter && shadowt < d) {
-                    color = Vector(0., 0., 0.);
-                } else {
-                    color = I/(4*M_PI*d*d)*albedo/M_PI*std::max(0., dot(N, PL/d));
-                }
-            }
+            Vector color = scene.getColor(r, 0);
 
             image[((H - i - 1)*W + j)* 3 + 0] = std::min(255.0, pow(color[0], 0.45));
             image[((H - i - 1)*W + j)* 3 + 1] = std::min(255.0, pow(color[1], 0.45));
