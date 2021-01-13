@@ -24,6 +24,5 @@ Vector operator*(const Vector &a, double b);
 Vector operator/(const Vector &a, double b);
 
 double dot(const Vector &a, const Vector &b);
-double sqr(double x);
 
 #endif //HELLOWORLD_VECTOR_H
