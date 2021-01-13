@@ -13,7 +13,7 @@
 class Scene {
 public:
     Scene();
-    bool intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo);
+    bool intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo, double &t);
     // list of objects in the scene
     std::vector<Sphere> objects;
 };

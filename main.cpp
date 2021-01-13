@@ -48,14 +48,23 @@ int main() {
 
             // check if ray intersects with an object in the scene
             Vector P, N, albedo;
-            bool inter = scene.intersect(r, P, N, albedo);
+            double t;
+            bool inter = scene.intersect(r, P, N, albedo, t);
             Vector color(0, 0, 0);
 
             if (inter) {
                 // Lambertian model for shadows
                 Vector PL = L - P;
                 double d = sqrt(PL.sqrNorm());
-                color = I/(4*M_PI*d*d)*albedo/M_PI*std::max(0., dot(N, PL/d));
+                Vector shadowP, shadowN, shadowAlbedo;
+                double shadowt;
+                Ray shadowRay(P, PL/d);
+                bool shadowInter = scene.intersect(shadowRay, shadowP, shadowN, shadowAlbedo, shadowt);
+                if (shadowInter && shadowt < d) {
+                    color = Vector(0., 0., 0.)
+                } else {
+                    color = I/(4*M_PI*d*d)*albedo/M_PI*std::max(0., dot(N, PL/d));
+                }
             }
 
             image[((H - i - 1)*W + j)* 3 + 0] = std::min(255.0, pow(color[0], 0.45));

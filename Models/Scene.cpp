@@ -18,7 +18,7 @@ Scene::Scene() {};
  * @param albedo color of the sphere the ray intersects
  * @return true if the input ray intersects with at least one of the spheres in the scene
  */
-bool Scene::intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo) {
+bool Scene::intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo, double &t) {
     double t = 1E10;
     bool hasInter = false;
 
