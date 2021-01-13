@@ -26,27 +26,27 @@ int main() {
     Sphere S1(Vector(-10, 10, 0), 10, Vector(1, 0., 0.), true);
     Sphere S2(Vector(10, 20, 0), 3, Vector(1., 0., 1.));
 
-    Sphere sol(Vector(0, -1000, 0), 990, Vector(1., 1., 1.));
-    Sphere wall1(Vector(-1000, 0, 0), 940, Vector(1., 0., 0.));
-    Sphere wall2(Vector(1000, 0, 0), 940, Vector(0., 1., 0.));
-    Sphere wall3(Vector(0, 0, -1000), 940, Vector(0., 0., 1.));
-    Sphere wall4(Vector(0, 0, 1000), 940, Vector(1., 1., 0.));
-    Sphere plafond(Vector(0, 1000, 0), 940, Vector(1., 1., 1.));
+    Sphere floor(Vector(0, -1000, 0), 990, Vector(1., 1., 1.));
+    Sphere leftWall(Vector(-1000, 0, 0), 940, Vector(1., 0., 0.));
+    Sphere rightWall(Vector(1000, 0, 0), 940, Vector(0., 1., 0.));
+    Sphere backroundWall(Vector(0, 0, -1000), 940, Vector(0., 0., 1.));
+    Sphere frontWall(Vector(0, 0, 1000), 940, Vector(1., 1., 0.));
+    Sphere ceiling(Vector(0, 1000, 0), 940, Vector(1., 1., 1.));
 
     scene.objects.push_back(S1);
     scene.objects.push_back(S2);
-    scene.objects.push_back(sol);
-    scene.objects.push_back(wall1);
-    scene.objects.push_back(wall2);
-    scene.objects.push_back(wall3);
-    scene.objects.push_back(wall4);
-    scene.objects.push_back(plafond);
+    scene.objects.push_back(floor);
+    scene.objects.push_back(leftWall);
+    scene.objects.push_back(rightWall);
+    scene.objects.push_back(backroundWall);
+    scene.objects.push_back(frontWall);
+    scene.objects.push_back(ceiling);
 
     // camera angle in rad
     double fov = 60*M_PI/180;
 
     // light intensity
-    scene. I = 5E9;
+    scene.I = 5E9;
 
     Vector rho(1, 0, 0);
     scene.L = Vector(-10, 20, 40);
