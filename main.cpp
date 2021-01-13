@@ -32,7 +32,7 @@ int main() {
     double fov = 60*M_PI/180;
 
     // light intensity
-    double I = 1E7;
+    double I = 5E9;
 
     Vector rho(1, 0, 0);
     Vector L(-10, 20, 40);
@@ -58,9 +58,9 @@ int main() {
                 color = I/(4*M_PI*d*d)*albedo/M_PI*std::max(0., dot(N, PL/d));
             }
 
-            image[((H - i - 1)*W + j)* 3 + 0] = std::min(255.0, color[0]);
-            image[((H - i - 1)*W + j)* 3 + 1] = std::min(255.0, color[1]);
-            image[((H - i - 1)*W + j)* 3 + 2] = std::min(255.0, color[2]);
+            image[((H - i - 1)*W + j)* 3 + 0] = std::min(255.0, std::pow(color[0], 0.45));
+            image[((H - i - 1)*W + j)* 3 + 1] = std::min(255.0, std::pow(color[1], 0.45));
+            image[((H - i - 1)*W + j)* 3 + 2] = std::min(255.0, std::pow(color[2], 0.45));
         }
     }
     stbi_write_png("image2.png", W, H, 3, &image[0], 0);
