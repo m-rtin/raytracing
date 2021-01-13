@@ -58,12 +58,12 @@ int main() {
                 color = I/(4*M_PI*d*d)*albedo/M_PI*std::max(0., dot(N, PL/d));
             }
 
-            image[((H - i - 1)*W + j)* 3 + 0] = std::min(255.0, std::pow(color[0], 0.45));
-            image[((H - i - 1)*W + j)* 3 + 1] = std::min(255.0, std::pow(color[1], 0.45));
-            image[((H - i - 1)*W + j)* 3 + 2] = std::min(255.0, std::pow(color[2], 0.45));
+            image[((H - i - 1)*W + j)* 3 + 0] = std::min(255.0, pow(color[0], 0.45));
+            image[((H - i - 1)*W + j)* 3 + 1] = std::min(255.0, pow(color[1], 0.45));
+            image[((H - i - 1)*W + j)* 3 + 2] = std::min(255.0, pow(color[2], 0.45));
         }
     }
-    stbi_write_png("image2.png", W, H, 3, &image[0], 0);
+    stbi_write_png("image3_gamma_correction.png", W, H, 3, &image[0], 0);
 
     return 0;
 }
