@@ -49,10 +49,9 @@ Vector Scene::getColor(const Ray& r, int rebound) {
 
     Vector P, N, albedo;
     double t;
-    bool mirror, transp;
-    bool inter = intersect(r, P, N, albedo, mirror, transp, t);
+    bool mirror, transparent;
+    bool inter = intersect(r, P, N, albedo, mirror, transparent, t);
     Vector color(0, 0, 0);
-
 
     if (inter) {
         if (mirror) {
@@ -60,38 +59,41 @@ Vector Scene::getColor(const Ray& r, int rebound) {
             Ray reflectedRay(P + 0.001*N, reflectedDir);
             return getColor(reflectedRay, rebound + 1);     
         } 
-        else if (transp) {
+        else {
+            if (transparent) {
                 double n1 = 1, n2 = 1.4;
                 Vector N2 = N;
                 if (dot(r.u, N) > 0) { // we leave the sphere
                     std::swap(n1, n2);
                     N2 = -N;
                 }
-                Vector Tt = n1/n2*(r.u - dot(r.u, N2)*N2);
-                double rad = 1 - sqr(n1/n2)*(1 - sqr(dot(r.u, N2)));
+                Vector Tt = n1 / n2 * (r.u - dot(r.u, N2) * N2);
+                double rad = 1 - pow(n1 / n2, 2) * (1 - pow(dot(r.u, N2), 2));
                 if (rad < 0) {
-                    Vector reflectedDir = r.u - 2*dot(r.u, N)*N;
-                    Ray reflectedRay(P + 0.001*N, reflectedDir);
-                    return getColor(reflectedRay, rebound + 1);     
+                    Vector reflectedDir = r.u - 2 * dot(r.u, N) * N;
+                    Ray reflectedRay(P + 0.001 * N, reflectedDir);
+                    return getColor(reflectedRay, rebound + 1);
                 }
-                Vector Tn = -sqrt(rad)*N2;
+                Vector Tn = -sqrt(rad) * N2;
                 Vector refractedDir = Tt + Tn;
-                return getColor(Ray(P + 0.0001*N2, refractedDir), rebound + 1);     
-        } else {
+                Ray refractedRay(P - 0.00001 * N2, refractedDir);
+                return getColor(refractedRay, rebound + 1);
+            }
             // Lambertian model for shadows
             Vector PL = L - P;
             double d = sqrt(PL.sqrNorm());
             Vector shadowP, shadowN, shadowAlbedo;
             double shadowt;
-            bool shadowMirror, shadowTransp;
-            Ray shadowRay(P + 0.001*N, PL/d);
+            bool shadowTransp;
+            Ray shadowRay(P + 0.001 * N, PL / d);
             bool shadowInter = intersect(shadowRay, shadowP, shadowN, shadowAlbedo, mirror, shadowTransp, shadowt);
             if (shadowInter && shadowt < d) {
                 color = Vector(0., 0., 0.);
             } else {
-                color = I/(4*M_PI*d*d)*albedo/M_PI*std::max(0., dot(N, PL/d));
+                color = I / (4 * M_PI * d * d) * albedo / M_PI * std::max(0., dot(N, PL / d));
             }
             return color;
         }
     }
+    return color;
 }

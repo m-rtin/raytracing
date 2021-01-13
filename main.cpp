@@ -23,8 +23,9 @@ int main() {
 
     // Create a scene
     Scene scene;
-    Sphere S1(Vector(-10, 10, 0), 10, Vector(1, 0., 0.), true);
+    Sphere S1(Vector(-10, 10, 0), 10, Vector(1, 0., 0.), false, true);
     Sphere S2(Vector(10, 20, 0), 3, Vector(1., 0., 1.));
+    Sphere S3(Vector(10, 20, -40), 5, Vector(1., 0., 1.), true, false);
 
     Sphere floor(Vector(0, -1000, 0), 990, Vector(1., 1., 1.));
     Sphere leftWall(Vector(-1000, 0, 0), 940, Vector(1., 0., 0.));
@@ -35,6 +36,7 @@ int main() {
 
     scene.objects.push_back(S1);
     scene.objects.push_back(S2);
+    scene.objects.push_back(S3);
     scene.objects.push_back(floor);
     scene.objects.push_back(leftWall);
     scene.objects.push_back(rightWall);
@@ -70,7 +72,7 @@ int main() {
             image[((H - i - 1)*W + j)* 3 + 2] = std::min(255.0, pow(color[2], 1/gamma));
         }
     }
-    stbi_write_png("image5_with_reflections.png", W, H, 3, &image[0], 0);
+    stbi_write_png("image6_transp.png", W, H, 3, &image[0], 0);
 
     return 0;
 }
