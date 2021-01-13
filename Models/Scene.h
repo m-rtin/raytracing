@@ -19,6 +19,7 @@ public:
     // list of objects in the scene
     std::vector<Sphere> objects;
     Vector L;
+    // light intensity
     double I;
 };
 

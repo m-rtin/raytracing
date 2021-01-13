@@ -59,11 +59,15 @@ int main() {
             Vector u(j - W/2, i - H/2, -W/(2.*tan(fov/2)));
             u = u.getNormalized();
             Ray r(C, u);
+
             Vector color = scene.getColor(r, 0);
 
-            image[((H - i - 1)*W + j)* 3 + 0] = std::min(255.0, pow(color[0], 0.45));
-            image[((H - i - 1)*W + j)* 3 + 1] = std::min(255.0, pow(color[1], 0.45));
-            image[((H - i - 1)*W + j)* 3 + 2] = std::min(255.0, pow(color[2], 0.45));
+            // gamma correction
+            double gamma = 2.2;
+
+            image[((H - i - 1)*W + j)* 3 + 0] = std::min(255.0, pow(color[0], 1/gamma));
+            image[((H - i - 1)*W + j)* 3 + 1] = std::min(255.0, pow(color[1], 1/gamma));
+            image[((H - i - 1)*W + j)* 3 + 2] = std::min(255.0, pow(color[2], 1/gamma));
         }
     }
     stbi_write_png("image5_with_reflections.png", W, H, 3, &image[0], 0);

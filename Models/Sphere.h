@@ -18,6 +18,7 @@ public:
     double R;
     // color of the sphere
     Vector albedo;
+    // a mirror sphere is a sphere which reflects all incoming rays
     bool isMirror;
 };
 
