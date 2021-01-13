@@ -29,7 +29,7 @@ int main() {
     Sphere floor(Vector(0, -1000, 0), 990, Vector(1., 1., 1.));
     Sphere leftWall(Vector(-1000, 0, 0), 940, Vector(1., 0., 0.));
     Sphere rightWall(Vector(1000, 0, 0), 940, Vector(0., 1., 0.));
-    Sphere backroundWall(Vector(0, 0, -1000), 940, Vector(0., 0., 1.));
+    Sphere backgroundWall(Vector(0, 0, -1000), 940, Vector(0., 0., 1.));
     Sphere frontWall(Vector(0, 0, 1000), 940, Vector(1., 1., 0.));
     Sphere ceiling(Vector(0, 1000, 0), 940, Vector(1., 1., 1.));
 
@@ -38,7 +38,7 @@ int main() {
     scene.objects.push_back(floor);
     scene.objects.push_back(leftWall);
     scene.objects.push_back(rightWall);
-    scene.objects.push_back(backroundWall);
+    scene.objects.push_back(backgroundWall);
     scene.objects.push_back(frontWall);
     scene.objects.push_back(ceiling);
 
