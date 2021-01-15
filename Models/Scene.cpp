@@ -75,17 +75,19 @@ Vector Scene::getColor(const Ray& r, int rebound) {
         else {
             if (transparent) {
                 // if the body is transparent we use Snell's law
+                // n1 and n2 are the phase velocities in the two media
                 double n1 = 1, n2 = 1.4;
                 Vector N2 = N;
-                if (dot(r.u, N) > 0) { // we leave the sphere
+
+                // normal vector and incoming ray need to have the same orientation
+                if (dot(r.u, N) > 0) {
                     std::swap(n1, n2);
                     N2 = -N;
                 }
                 // tangential component
                 Vector Tt = n1 / n2 * (r.u - dot(r.u, N2) * N2);
                 double rad = 1 - pow(n1 / n2, 2) * (1 - pow(dot(r.u, N2), 2));
-                if (rad < 0) {
-                    // use the formula for reflection of vectors
+                if (rad < 0) { // the square root is complex which means we have total reflection
                     Vector reflectedDir = r.u - 2 * dot(r.u, N) * N;
                     Ray reflectedRay(P + 0.001 * N, reflectedDir);
                     return getColor(reflectedRay, rebound + 1);
