@@ -12,6 +12,7 @@ class Sphere {
 public:
     Sphere(const Vector& O, double R, const Vector& albedo, bool isMirror=false, bool isTransparent=false);
     bool intersect(const Ray& r, Vector& P, Vector& N, double &t);
+
     // center of the sphere
     Vector O;
     // radius of the sphere
@@ -19,7 +20,9 @@ public:
     // color of the sphere
     Vector albedo;
     // a mirror sphere is a sphere which reflects all incoming rays
-    bool isMirror, isTransparent;
+    bool isMirror;
+    // a transparent sphere uses Snell's law for incoming rays
+    bool isTransparent;
 };
 
 

@@ -7,10 +7,11 @@
 
 
 Vector::Vector(double x, double y, double z) {
-        coords[0] = x;
-        coords[1] = y;
-        coords[2] = z;
+    coords[0] = x;
+    coords[1] = y;
+    coords[2] = z;
 };
+
 double Vector::operator[](int i) const {
     return coords[i];
 }
@@ -51,6 +52,7 @@ Vector operator*(const Vector &a, double b) {
 Vector operator/(const Vector &a, double b) {
     return Vector(a[0]/b, a[1]/b, a[2]/b);
 }
+
 double dot(const Vector &a, const Vector &b) {
     return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
 }

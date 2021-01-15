@@ -16,9 +16,12 @@ Scene::Scene() {};
  * @param P intersection point
  * @param N normal vector of the sphere at the intersection point
  * @param albedo color of the sphere the ray intersects
+ * @param mirror return value which indicates if the object is a mirror
+ * @param transparency return value which indicates if the object is transparent
+ * @param t return value which indicates at which point of the ray the intersection happens
  * @return true if the input ray intersects with at least one of the spheres in the scene
  */
-bool Scene::intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo, bool &mirror, bool &transp, double &t) {
+bool Scene::intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo, bool &mirror, bool &transparency, double &t) {
     t = 1E10;
     bool hasInter = false;
 
@@ -34,7 +37,7 @@ bool Scene::intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo, bool &
             P = localP;
             N = localN;
             mirror = objects[i].isMirror;
-            transp = objects[i].isTransparent;
+            transparency = objects[i].isTransparent;
         }
     }
 
@@ -42,6 +45,15 @@ bool Scene::intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo, bool &
 }
 
 
+/**
+ * Get color of object in scene which intersects with the incoming ray.
+ *
+ * If the object is a mirror or transparent, we calculate the new ray direction and call the function recursively.
+ *
+ * @param r incoming ray
+ * @param rebound upper bound for recursion calls
+ * @return color of the object the ray intersects with
+ */
 Vector Scene::getColor(const Ray& r, int rebound) {
     if (rebound > 5) {
         return Vector(0., 0., 0.);
@@ -50,35 +62,43 @@ Vector Scene::getColor(const Ray& r, int rebound) {
     Vector P, N, albedo;
     double t;
     bool mirror, transparent;
-    bool inter = intersect(r, P, N, albedo, mirror, transparent, t);
+    bool inter = this->intersect(r, P, N, albedo, mirror, transparent, t);
     Vector color(0, 0, 0);
 
     if (inter) {
         if (mirror) {
+            // use the formula for reflection of vectors
             Vector reflectedDir = r.u - 2*dot(r.u, N)*N;
             Ray reflectedRay(P + 0.001*N, reflectedDir);
             return getColor(reflectedRay, rebound + 1);     
         } 
         else {
             if (transparent) {
+                // if the body is transparent we use Snell's law
                 double n1 = 1, n2 = 1.4;
                 Vector N2 = N;
                 if (dot(r.u, N) > 0) { // we leave the sphere
                     std::swap(n1, n2);
                     N2 = -N;
                 }
+                // tangential component
                 Vector Tt = n1 / n2 * (r.u - dot(r.u, N2) * N2);
                 double rad = 1 - pow(n1 / n2, 2) * (1 - pow(dot(r.u, N2), 2));
                 if (rad < 0) {
+                    // use the formula for reflection of vectors
                     Vector reflectedDir = r.u - 2 * dot(r.u, N) * N;
                     Ray reflectedRay(P + 0.001 * N, reflectedDir);
                     return getColor(reflectedRay, rebound + 1);
                 }
+                // normal component
                 Vector Tn = -sqrt(rad) * N2;
+
+                // the refracted vector is made up of the tangential and normal component
                 Vector refractedDir = Tt + Tn;
                 Ray refractedRay(P - 0.00001 * N2, refractedDir);
                 return getColor(refractedRay, rebound + 1);
             }
+
             // Lambertian model for shadows
             Vector PL = L - P;
             double d = sqrt(PL.sqrNorm());
@@ -86,7 +106,7 @@ Vector Scene::getColor(const Ray& r, int rebound) {
             double shadowt;
             bool shadowTransp;
             Ray shadowRay(P + 0.001 * N, PL / d);
-            bool shadowInter = intersect(shadowRay, shadowP, shadowN, shadowAlbedo, mirror, shadowTransp, shadowt);
+            bool shadowInter = this->intersect(shadowRay, shadowP, shadowN, shadowAlbedo, mirror, shadowTransp, shadowt);
             if (shadowInter && shadowt < d) {
                 color = Vector(0., 0., 0.);
             } else {
