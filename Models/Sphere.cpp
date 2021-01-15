@@ -11,9 +11,9 @@ Sphere::Sphere(const Vector& O, double R, const Vector& albedo, bool isMirror, b
  * Check if a given ray intersects with a given sphere.
  *
  * @param r incoming ray
- * @param P intersection point we want to return
- * @param N normal vector of sphere at intersection point we want to return
- * @param t length of direction vector to intersect with the sphere we want to return
+ * @param P intersection point
+ * @param N normal vector of sphere at intersection point
+ * @param t length of direction vector to intersect with the sphere
  * @return true if the input ray intersects with the sphere, false otherwise
  */
 bool Sphere::intersect(const Ray& r, Vector& P, Vector& N, double &t) {

@@ -17,8 +17,8 @@ Scene::Scene() {};
  * @param N normal vector of the sphere at the intersection point
  * @param albedo color of the sphere the ray intersects
  * @param mirror return value which indicates if the object is a mirror
- * @param transparency return value which indicates if the object is transparent
- * @param t return value which indicates at which point of the ray the intersection happens
+ * @param transparency indicates if the object is transparent
+ * @param t indicates at which point of the ray the intersection happens
  * @return true if the input ray intersects with at least one of the spheres in the scene
  */
 bool Scene::intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo, bool &mirror, bool &transparency, double &t) {
