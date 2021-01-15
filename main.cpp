@@ -50,7 +50,7 @@ int main() {
     // light intensity
     scene.I = 5E9;
 
-    Vector rho(1, 0, 0);
+    // radiance
     scene.L = Vector(-10, 20, 40);
 
     std::vector<unsigned char> image(W*H * 3, 0);
