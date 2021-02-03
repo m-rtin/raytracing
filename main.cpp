@@ -7,6 +7,12 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+
+#include <iostream>
+#include <random>
+static std::default_random_engine engine(10); // random seed = 10
+static std::uniform_real_distribution<double> uniform(0, 1);
+
 #include <algorithm>
 #include "Models/Vector.h"
 #include "Models/Ray.h"
@@ -23,7 +29,7 @@ int main() {
 
     // Create a scene
     Scene scene;
-    Sphere S1(Vector(-10, 10, 0), 10, Vector(1, 0., 0.), false, true);
+    Sphere S1(Vector(-10, 10, 0), 10, Vector(1, 0., 0.));
     Sphere S2(Vector(10, 20, 0), 3, Vector(1., 0., 1.), true, false);
     Sphere S3(Vector(10, 20, -40), 5, Vector(1., 0., 1.));
 
@@ -53,16 +59,27 @@ int main() {
     // radiance
     scene.L = Vector(-10, 20, 40);
 
+    int numberOfRays = 100;
+
     std::vector<unsigned char> image(W*H * 3, 0);
+#pragma omp parallel for schedule(dynamic, 1)
     for (int i = 0; i < H; i++) {
         for (int j = 0; j < W; j++) {
 
-            // create ray from pixel coordinates
-            Vector u(j - W/2, i - H/2, -W/(2.*tan(fov/2)));
-            u = u.getNormalized();
-            Ray r(C, u);
+            Vector color(0, 0, 0);
+            for (int k = 0; k < numberOfRays; k++) {
+                double u1 = uniform(engine);
+                double u2 = uniform(engine);
+                double x1 = 0.25*cos(2*M_PI*u1)*sqrt(1- u2);
+                double x2 = 0.25*sin(2*M_PI*u1)*sqrt(1- u2);
 
-            Vector color = scene.getColor(r, 0);
+                // create ray from pixel coordinates
+                Vector u(j - W/2 + x2, i - H/2 + x1 + 0.5, -W/(2.*tan(fov/2)));
+                u = u.getNormalized();
+                Ray r(C, u);
+                color += scene.getColor(r, 0);
+            }
+            color = color/numberOfRays;
 
             // gamma correction
             double gamma = 2.2;
@@ -72,7 +89,7 @@ int main() {
             image[((H - i - 1)*W + j)* 3 + 2] = std::min(255.0, pow(color[2], 1/gamma));
         }
     }
-    stbi_write_png("image6_transp.png", W, H, 3, &image[0], 0);
+    stbi_write_png("image8_antia.png", W, H, 3, &image[0], 0);
 
     return 0;
 }

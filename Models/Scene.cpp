@@ -3,6 +3,9 @@
 //
 
 #include "Scene.h"
+#include <random>
+static std::default_random_engine engine(10); // random seed = 10
+static std::uniform_real_distribution<double> uniform(0, 1);
 
 Scene::Scene() {};
 
@@ -44,6 +47,27 @@ bool Scene::intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo, bool &
     return hasInter;
 }
 
+Vector random_cos(const Vector& N) {
+    double u1 = uniform(engine);
+    double u2 = uniform(engine);
+    double x = cos(2*M_PI*u1)*sqrt(1- u2);
+    double y = sin(2*M_PI*u1)*sqrt(1- u2);
+    double z = sqrt(u2);
+    Vector T1;
+    if (N[0] < N[1] && N[0] < N[2]) {
+        T1 = Vector(0, N[2], -N[1]);
+    } else {
+        if (N[1] < N[2] && N[1] < N[0]) {
+            T1 = Vector(N[2], 0, -N[0]);
+        } else {
+
+            T1 = Vector(N[1], -N[0], 0);
+        }
+    }
+    T1 = T1.getNormalized();
+    Vector T2 = cross(N, T1);
+    return z*N + x*T1 + y*T2;
+}
 
 /**
  * Get color of object in scene which intersects with the incoming ray.
@@ -114,7 +138,10 @@ Vector Scene::getColor(const Ray& r, int rebound) {
             } else {
                 color = I / (4 * M_PI * d * d) * albedo / M_PI * std::max(0., dot(N, PL / d));
             }
-            return color;
+            // Vector wi = r.u - 2*dot(r.u, N)*n;
+            Vector wiDir = random_cos(N);
+            Ray wiRay(P + 0.00001*N, wiDir);
+            color += albedo*getColor(wiRay, rebound + 1);
         }
     }
     return color;
