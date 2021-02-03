@@ -94,7 +94,10 @@ Vector Scene::getColor(const Ray& r, int rebound) {
     if (inter) {
 
         if (objectid == 0) {
-            return Vector(I, I, I)/(4*M_PI*M_PI*objects[0].R*objects[0].R);
+            if (rebound == 0)
+                return Vector(I, I, I)/(4*M_PI*M_PI*objects[0].R*objects[0].R);
+            else
+                return Vector(0., 0., 0.);
         }
 
         if (mirror) {
@@ -132,23 +135,29 @@ Vector Scene::getColor(const Ray& r, int rebound) {
                 return getColor(refractedRay, rebound + 1);
             }
 
-            /*
-            // Lambertian model for shadows
+            // direct lighting
             Vector PL = L - P;
-            double d = sqrt(PL.sqrNorm());
+            PL = PL.getNormalized();
+            Vector w = random_cos(-PL);
+            Vector xprime = w*objects[0].R + objects[0].O;
+            Vector Pxprime = xprime - P;
+            double d = sqrt(Pxprime.sqrNorm());
+            Pxprime = Pxprime/d;
+
             Vector shadowP, shadowN, shadowAlbedo;
             double shadowt;
             bool shadowTransp;
-            Ray shadowRay(P + 0.001 * N, PL / d);
+            Ray shadowRay(P + 0.00001 * N, Pxprime);
             bool shadowInter = this->intersect(shadowRay, shadowP, shadowN, shadowAlbedo, mirror, shadowTransp, shadowt, objectid);
-            if (shadowInter && shadowt < d) {
+            if (shadowInter && shadowt < d-0.0001) {
                 color = Vector(0., 0., 0.);
             } else {
-                color = I / (4 * M_PI * d * d) * albedo / M_PI * std::max(0., dot(N, PL / d));
+                double proba = std::max(0., dot(-PL, w)) / (M_PI*objects[0].R*objects[0].R);
+                double J = std::max(0., dot(w, -Pxprime)) / (d*d);
+                color = I / (4 * M_PI * M_PI * objects[0].R*objects[0].R) * albedo / M_PI * std::max(0., dot(N, Pxprime)) * J/proba;
             }
-             */
 
-            // Vector wi = r.u - 2*dot(r.u, N)*n;
+            // indirect lighting
             Vector wiDir = random_cos(N);
             Ray wiRay(P + 0.00001*N, wiDir);
             color += albedo*getColor(wiRay, rebound + 1);

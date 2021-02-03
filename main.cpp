@@ -7,8 +7,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-
-#include <iostream>
 #include <random>
 static std::default_random_engine engine(10); // random seed = 10
 static std::uniform_real_distribution<double> uniform(0, 1);
@@ -34,8 +32,8 @@ int main() {
     // radiance
     scene.L = Vector(-10, 20, 40);
 
-    Sphere lightBall(Vector(-10, 20, 40), 10, Vector(1, 1., 1.));
-    Sphere S1(Vector(-10, 10, 0), 10, Vector(1, 0., 0.));
+    Sphere lightBall(scene.L, 5, Vector(1, 1., 1.));
+    Sphere S1(Vector(0, 2, 0), 10, Vector(1, 0., 0.), false, true);
     Sphere S2(Vector(10, 20, 0), 3, Vector(1., 0., 1.), true, false);
     Sphere S3(Vector(10, 20, -40), 5, Vector(1., 0., 1.));
 
