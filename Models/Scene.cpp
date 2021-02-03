@@ -24,7 +24,7 @@ Scene::Scene() {};
  * @param t indicates at which point of the ray the intersection happens
  * @return true if the input ray intersects with at least one of the spheres in the scene
  */
-bool Scene::intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo, bool &mirror, bool &transparency, double &t) {
+bool Scene::intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo, bool &mirror, bool &transparency, double &t, int& objectid) {
     t = 1E10;
     bool hasInter = false;
 
@@ -41,6 +41,7 @@ bool Scene::intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo, bool &
             N = localN;
             mirror = objects[i].isMirror;
             transparency = objects[i].isTransparent;
+            objectid = i;
         }
     }
 
@@ -50,8 +51,8 @@ bool Scene::intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo, bool &
 Vector random_cos(const Vector& N) {
     double u1 = uniform(engine);
     double u2 = uniform(engine);
-    double x = cos(2*M_PI*u1)*sqrt(1- u2);
-    double y = sin(2*M_PI*u1)*sqrt(1- u2);
+    double x = cos(2*M_PI*u1)*sqrt(-2 * log(u2));
+    double y = sin(2*M_PI*u1)*sqrt(-2 * log(u2));
     double z = sqrt(u2);
     Vector T1;
     if (N[0] < N[1] && N[0] < N[2]) {
@@ -86,10 +87,16 @@ Vector Scene::getColor(const Ray& r, int rebound) {
     Vector P, N, albedo;
     double t;
     bool mirror, transparent;
-    bool inter = this->intersect(r, P, N, albedo, mirror, transparent, t);
+    int objectid;
+    bool inter = this->intersect(r, P, N, albedo, mirror, transparent, t, objectid);
     Vector color(0, 0, 0);
 
     if (inter) {
+
+        if (objectid == 0) {
+            return Vector(I, I, I)/(4*M_PI*M_PI*objects[0].R*objects[0].R);
+        }
+
         if (mirror) {
             // use the formula for reflection of vectors
             Vector reflectedDir = r.u - 2*dot(r.u, N)*N;
@@ -125,6 +132,7 @@ Vector Scene::getColor(const Ray& r, int rebound) {
                 return getColor(refractedRay, rebound + 1);
             }
 
+            /*
             // Lambertian model for shadows
             Vector PL = L - P;
             double d = sqrt(PL.sqrNorm());
@@ -132,12 +140,14 @@ Vector Scene::getColor(const Ray& r, int rebound) {
             double shadowt;
             bool shadowTransp;
             Ray shadowRay(P + 0.001 * N, PL / d);
-            bool shadowInter = this->intersect(shadowRay, shadowP, shadowN, shadowAlbedo, mirror, shadowTransp, shadowt);
+            bool shadowInter = this->intersect(shadowRay, shadowP, shadowN, shadowAlbedo, mirror, shadowTransp, shadowt, objectid);
             if (shadowInter && shadowt < d) {
                 color = Vector(0., 0., 0.);
             } else {
                 color = I / (4 * M_PI * d * d) * albedo / M_PI * std::max(0., dot(N, PL / d));
             }
+             */
+
             // Vector wi = r.u - 2*dot(r.u, N)*n;
             Vector wiDir = random_cos(N);
             Ray wiRay(P + 0.00001*N, wiDir);

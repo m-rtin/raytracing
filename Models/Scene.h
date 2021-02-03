@@ -13,7 +13,7 @@
 class Scene {
 public:
     Scene();
-    bool intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo, bool &mirror, bool &transparency, double &t);
+    bool intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo, bool &mirror, bool &transparency, double &t, int& objectid);
     Vector getColor(const Ray& r, int rebound);
 
     // list of objects in the scene
