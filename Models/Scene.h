@@ -13,11 +13,11 @@
 class Scene {
 public:
     Scene();
-    bool intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo, bool &mirror, bool &transparency, double &t, int& objectid);
+    bool intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo, bool &mirror, bool &transparency, double &t, int& objectid);//, Object* &s);
     Vector getColor(const Ray& r, int rebound, bool lastDiffuse);
 
     // list of objects in the scene
-    std::vector<Sphere> objects;
+    std::vector<Object*> objects;
     // radiance
     Vector L;
     // light intensity

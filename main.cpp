@@ -16,11 +16,13 @@ static std::uniform_real_distribution<double> uniform(0, 1);
 #include "Models/Ray.h"
 #include "Models/Sphere.h"
 #include "Models/Scene.h"
+#include "Models/TriangleIndices.h"
+#include "Models/TriangleMesh.h"
 
 
 int main() {
-    int W = 512;
-    int H = 512;
+    int W = 128;
+    int H = 128;
 
     // camera position
     Vector C(0, 0, 55);
@@ -44,21 +46,34 @@ int main() {
     Sphere frontWall(Vector(0, 0, 1000), 940, Vector(1., 1., 0.));
     Sphere ceiling(Vector(0, 1000, 0), 940, Vector(1., 1., 1.));
 
-    scene.objects.push_back(lightBall);
-    scene.objects.push_back(S1);
-    scene.objects.push_back(S2);
-    scene.objects.push_back(S3);
-    scene.objects.push_back(floor);
-    scene.objects.push_back(leftWall);
-    scene.objects.push_back(rightWall);
-    scene.objects.push_back(backgroundWall);
-    scene.objects.push_back(frontWall);
-    scene.objects.push_back(ceiling);
+    TriangleMesh m(Vector(1., 1., 1.));
+    m.readOBJ("13463_Australian_Cattle_Dog_v3.obj");
+    for (int i = 0; i <m.vertices.size(); i++) {
+        std::swap(m.vertices[i][1], m.vertices[i][2]);
+        m.vertices[i][2] += 22;
+        m.vertices[i][1] -= 10;
+    }
+    for (int i = 0; i <m.normals.size(); i++) {
+        std::swap(m.normals[i][1], m.normals[i][2]);
+    }
+
+    m.buildBB();
+
+    scene.objects.push_back(&lightBall);
+    // scene.objects.push_back(&S1);
+    // scene.objects.push_back(&S2);
+    // scene.objects.push_back(&S3);
+    scene.objects.push_back(&floor);
+    scene.objects.push_back(&leftWall);
+    scene.objects.push_back(&rightWall);
+    scene.objects.push_back(&backgroundWall);
+    scene.objects.push_back(&frontWall);
+    scene.objects.push_back(&ceiling);
 
     // camera angle in rad
     double fov = 60*M_PI/180;
 
-    int numberOfRays = 100;
+    int numberOfRays = 1;
 
     std::vector<unsigned char> image(W*H * 3, 0);
 
@@ -74,8 +89,8 @@ int main() {
                 double x2 = 0.25*sin(2*M_PI*u1)*sqrt(-2 * log(u2));
                 u1 = uniform(engine);
                 u2 = uniform(engine);
-                double x3 = 1*cos(2*M_PI*u1)*sqrt(-2 * log(u2));
-                double x4 = 1*sin(2*M_PI*u1)*sqrt(-2 * log(u2));
+                double x3 = 0.01*cos(2*M_PI*u1)*sqrt(-2 * log(u2));
+                double x4 = 0.01*sin(2*M_PI*u1)*sqrt(-2 * log(u2));
 
 
 
@@ -99,7 +114,7 @@ int main() {
             image[((H - i - 1)*W + j)* 3 + 2] = std::min(255.0, pow(color[2], 1/gamma));
         }
     }
-    stbi_write_png("image8_cam.png", W, H, 3, &image[0], 0);
+    stbi_write_png("image9_dog.png", W, H, 3, &image[0], 0);
 
     return 0;
 }

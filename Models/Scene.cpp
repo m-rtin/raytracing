@@ -33,14 +33,14 @@ bool Scene::intersect(const Ray& r, Vector& P, Vector& N, Vector &albedo, bool &
         double localt;
 
         // localt < t assures that the object is at the front of the scene
-        if (objects[i].intersect(r, localP, localN, localt) && localt < t) {
+        if (objects[i]->intersect(r, localP, localN, localt) && localt < t) {
             t = localt;
             hasInter = true;
-            albedo = objects[i].albedo;
+            albedo = objects[i]->albedo;
             P = localP;
             N = localN;
-            mirror = objects[i].isMirror;
-            transparency = objects[i].isTransparent;
+            mirror = objects[i]->isMirror;
+            transparency = objects[i]->isTransparent;
             objectid = i;
         }
     }
@@ -94,8 +94,10 @@ Vector Scene::getColor(const Ray& r, int rebound, bool lastDiffuse) {
     if (inter) {
 
         if (objectid == 0) {
-            if (rebound == 0 || !lastDiffuse)
-                return Vector(I, I, I)/(4*M_PI*M_PI*objects[0].R*objects[0].R);
+            if (rebound == 0 || !lastDiffuse) {
+                double R2 = pow(dynamic_cast<Sphere *>(objects[0])->R, 2);
+                return Vector(I, I, I) / (4 * M_PI * M_PI * R2);
+            }
             else
                 return Vector(0., 0., 0.);
         }
@@ -103,7 +105,7 @@ Vector Scene::getColor(const Ray& r, int rebound, bool lastDiffuse) {
         if (mirror) {
             // use the formula for reflection of vectors
             Vector reflectedDir = r.u - 2*dot(r.u, N)*N;
-            Ray reflectedRay(P + 0.001*N, reflectedDir);
+            Ray reflectedRay(P + 0.00001*N, reflectedDir);
             return getColor(reflectedRay, rebound + 1, false);
         } 
         else {
@@ -139,22 +141,24 @@ Vector Scene::getColor(const Ray& r, int rebound, bool lastDiffuse) {
             Vector PL = L - P;
             PL = PL.getNormalized();
             Vector w = random_cos(-PL);
-            Vector xprime = w*objects[0].R + objects[0].O;
+            Vector xprime = w*dynamic_cast<Sphere*>(objects[0])->R + dynamic_cast<Sphere*>(objects[0])->O;
             Vector Pxprime = xprime - P;
             double d = sqrt(Pxprime.sqrNorm());
             Pxprime = Pxprime/d;
 
             Vector shadowP, shadowN, shadowAlbedo;
             double shadowt;
-            bool shadowTransp;
+            bool shadowMirror, shadowTransp;
+            int objectid;
             Ray shadowRay(P + 0.00001 * N, Pxprime);
-            bool shadowInter = this->intersect(shadowRay, shadowP, shadowN, shadowAlbedo, mirror, shadowTransp, shadowt, objectid);
+            bool shadowInter = this->intersect(shadowRay, shadowP, shadowN, shadowAlbedo, shadowMirror, shadowTransp, shadowt, objectid);
             if (shadowInter && shadowt < d-0.0001) {
                 color = Vector(0., 0., 0.);
             } else {
-                double proba = std::max(0., dot(-PL, w)) / (M_PI*objects[0].R*objects[0].R);
+                double R2 = pow(dynamic_cast<Sphere*>(objects[0])->R, 2);
+                double proba = std::max(0., dot(-PL, w)) / (M_PI*R2);
                 double J = std::max(0., dot(w, -Pxprime)) / (d*d);
-                color = I / (4 * M_PI * M_PI * objects[0].R*objects[0].R) * albedo / M_PI * std::max(0., dot(N, Pxprime)) * J/proba;
+                color = I / (4 * M_PI * M_PI * R2) * albedo / M_PI * std::max(0., dot(N, Pxprime)) * J/proba;
             }
 
             // indirect lighting

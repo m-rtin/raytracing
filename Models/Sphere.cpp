@@ -5,7 +5,13 @@
 #include <cmath>
 #include "Sphere.h"
 
-Sphere::Sphere(const Vector& O, double R, const Vector& albedo, bool isMirror, bool isTransparent): O(O), R(R), albedo(albedo), isMirror(isMirror), isTransparent(isTransparent) {};
+Sphere::Sphere(const Vector& O, double R, const Vector& albedo, bool isMirror, bool isTransparent) {
+    this->O = O;
+    this->R = R;
+    this->albedo = albedo;
+    this->isMirror = isMirror;
+    this->isTransparent = isTransparent;
+};
 
 /**
  * Check if a given ray intersects with a given sphere.

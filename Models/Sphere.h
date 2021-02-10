@@ -7,8 +7,9 @@
 
 #include "Vector.h"
 #include "Ray.h"
+#include "Object.h"
 
-class Sphere {
+class Sphere : public Object {
 public:
     Sphere(const Vector& O, double R, const Vector& albedo, bool isMirror=false, bool isTransparent=false);
     bool intersect(const Ray& r, Vector& P, Vector& N, double &t);
