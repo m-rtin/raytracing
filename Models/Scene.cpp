@@ -79,7 +79,7 @@ Vector random_cos(const Vector& N) {
  * @param rebound upper bound for recursion calls
  * @return color of the object the ray intersects with
  */
-Vector Scene::getColor(const Ray& r, int rebound) {
+Vector Scene::getColor(const Ray& r, int rebound, bool lastDiffuse) {
     if (rebound > 5) {
         return Vector(0., 0., 0.);
     }
@@ -94,7 +94,7 @@ Vector Scene::getColor(const Ray& r, int rebound) {
     if (inter) {
 
         if (objectid == 0) {
-            if (rebound == 0)
+            if (rebound == 0 || !lastDiffuse)
                 return Vector(I, I, I)/(4*M_PI*M_PI*objects[0].R*objects[0].R);
             else
                 return Vector(0., 0., 0.);
@@ -104,7 +104,7 @@ Vector Scene::getColor(const Ray& r, int rebound) {
             // use the formula for reflection of vectors
             Vector reflectedDir = r.u - 2*dot(r.u, N)*N;
             Ray reflectedRay(P + 0.001*N, reflectedDir);
-            return getColor(reflectedRay, rebound + 1);     
+            return getColor(reflectedRay, rebound + 1, false);
         } 
         else {
             if (transparent) {
@@ -124,7 +124,7 @@ Vector Scene::getColor(const Ray& r, int rebound) {
                 if (rad < 0) { // the square root is complex which means we have total reflection
                     Vector reflectedDir = r.u - 2 * dot(r.u, N) * N;
                     Ray reflectedRay(P + 0.001 * N, reflectedDir);
-                    return getColor(reflectedRay, rebound + 1);
+                    return getColor(reflectedRay, rebound + 1, false);
                 }
                 // normal component
                 Vector Tn = -sqrt(rad) * N2;
@@ -132,7 +132,7 @@ Vector Scene::getColor(const Ray& r, int rebound) {
                 // the refracted vector is made up of the tangential and normal component
                 Vector refractedDir = Tt + Tn;
                 Ray refractedRay(P - 0.00001 * N2, refractedDir);
-                return getColor(refractedRay, rebound + 1);
+                return getColor(refractedRay, rebound + 1, false);
             }
 
             // direct lighting
@@ -160,7 +160,7 @@ Vector Scene::getColor(const Ray& r, int rebound) {
             // indirect lighting
             Vector wiDir = random_cos(N);
             Ray wiRay(P + 0.00001*N, wiDir);
-            color += albedo*getColor(wiRay, rebound + 1);
+            color += albedo*getColor(wiRay, rebound + 1, true);
         }
     }
     return color;

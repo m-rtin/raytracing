@@ -33,9 +33,9 @@ int main() {
     scene.L = Vector(-10, 20, 40);
 
     Sphere lightBall(scene.L, 5, Vector(1, 1., 1.));
-    Sphere S1(Vector(0, 2, 0), 10, Vector(1, 0., 0.), false, true);
-    Sphere S2(Vector(10, 20, 0), 3, Vector(1., 0., 1.), true, false);
-    Sphere S3(Vector(10, 20, -40), 5, Vector(1., 0., 1.));
+    Sphere S1(Vector(0, 0, 0), 10, Vector(1, 0., 0.), false, true);
+    Sphere S2(Vector(-10, 0, -20), 3, Vector(1., 0., 1.), true, false);
+    Sphere S3(Vector(10, 0, 20), 5, Vector(1., 0., 1.));
 
     Sphere floor(Vector(0, -1000, 0), 990, Vector(1., 1., 1.));
     Sphere leftWall(Vector(-1000, 0, 0), 940, Vector(1., 0., 0.));
@@ -72,12 +72,22 @@ int main() {
                 double u2 = uniform(engine);
                 double x1 = 0.25*cos(2*M_PI*u1)*sqrt(-2 * log(u2));
                 double x2 = 0.25*sin(2*M_PI*u1)*sqrt(-2 * log(u2));
+                u1 = uniform(engine);
+                u2 = uniform(engine);
+                double x3 = 1*cos(2*M_PI*u1)*sqrt(-2 * log(u2));
+                double x4 = 1*sin(2*M_PI*u1)*sqrt(-2 * log(u2));
+
+
 
                 // create ray from pixel coordinates
-                Vector u(j - W/2 + x2, i - H/2 + x1 + 0.5, -W/(2.*tan(fov/2)));
+                Vector u(j - W/2 + x2 + 0.5, i - H/2 + x1 + 0.5, -W/(2.*tan(fov/2)));
                 u = u.getNormalized();
-                Ray r(C, u);
-                color += scene.getColor(r, 0);
+                Vector target = C + 55 * u;
+                Vector Cprim = C + Vector(x3, x4, 0);
+                Vector uprime = (target - Cprim).getNormalized();
+
+                Ray r(Cprim, uprime);
+                color += scene.getColor(r, 0, false);
             }
             color = color/numberOfRays;
 
@@ -89,7 +99,7 @@ int main() {
             image[((H - i - 1)*W + j)* 3 + 2] = std::min(255.0, pow(color[2], 1/gamma));
         }
     }
-    stbi_write_png("image8_douce_shadow.png", W, H, 3, &image[0], 0);
+    stbi_write_png("image8_cam.png", W, H, 3, &image[0], 0);
 
     return 0;
 }
