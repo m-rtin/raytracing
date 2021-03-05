@@ -133,32 +133,32 @@ Vector Scene::getColor(const Ray& r, int rebound, bool lastDiffuse) {
 
                 // the refracted vector is made up of the tangential and normal component
                 Vector refractedDir = Tt + Tn;
-                Ray refractedRay(P - 0.00001 * N2, refractedDir);
+                Ray refractedRay(P - 0.0001 * N2, refractedDir);
                 return getColor(refractedRay, rebound + 1, false);
             }
-
             // direct lighting
             Vector PL = L - P;
             PL = PL.getNormalized();
             Vector w = random_cos(-PL);
-            Vector xprime = w*dynamic_cast<Sphere*>(objects[0])->R + dynamic_cast<Sphere*>(objects[0])->O;
+            Vector xprime = w * dynamic_cast<Sphere *>(objects[0])->R + dynamic_cast<Sphere *>(objects[0])->O;
             Vector Pxprime = xprime - P;
             double d = sqrt(Pxprime.sqrNorm());
-            Pxprime = Pxprime/d;
+            Pxprime = Pxprime / d;
 
             Vector shadowP, shadowN, shadowAlbedo;
             double shadowt;
             bool shadowMirror, shadowTransp;
-            int objectid;
+            // int objectid;
             Ray shadowRay(P + 0.00001 * N, Pxprime);
-            bool shadowInter = this->intersect(shadowRay, shadowP, shadowN, shadowAlbedo, shadowMirror, shadowTransp, shadowt, objectid);
-            if (shadowInter && shadowt < d-0.0001) {
+            bool shadowInter = this->intersect(shadowRay, shadowP, shadowN, shadowAlbedo, shadowMirror,
+                                               shadowTransp, shadowt, objectid);
+            if (shadowInter && shadowt < d - 0.0001) {
                 color = Vector(0., 0., 0.);
             } else {
-                double R2 = pow(dynamic_cast<Sphere*>(objects[0])->R, 2);
-                double proba = std::max(0., dot(-PL, w)) / (M_PI*R2);
-                double J = std::max(0., dot(w, -Pxprime)) / (d*d);
-                color = I / (4 * M_PI * M_PI * R2) * albedo / M_PI * std::max(0., dot(N, Pxprime)) * J/proba;
+                double R2 = pow(dynamic_cast<Sphere *>(objects[0])->R, 2);
+                double proba = std::max(0., dot(-PL, w)) / (M_PI * R2);
+                double J = std::max(0., dot(w, -Pxprime)) / (d * d);
+                color = I / (4 * M_PI * M_PI * R2) * albedo / M_PI * std::max(0., dot(N, Pxprime)) * J / proba;
             }
 
             // indirect lighting

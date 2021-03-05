@@ -21,8 +21,8 @@ static std::uniform_real_distribution<double> uniform(0, 1);
 
 
 int main() {
-    int W = 128;
-    int H = 128;
+    int W = 512;
+    int H = 512;
 
     // camera position
     Vector C(0, 0, 55);
@@ -46,41 +46,48 @@ int main() {
     Sphere frontWall(Vector(0, 0, 1000), 940, Vector(1., 1., 0.));
     Sphere ceiling(Vector(0, 1000, 0), 940, Vector(1., 1., 1.));
 
+
     TriangleMesh m(Vector(1., 1., 1.));
-    m.readOBJ("13463_Australian_Cattle_Dog_v3.obj");
+
+    m.readOBJ("/Users/martin/CLionProjects/raytracer/dog.obj");
+
     for (int i = 0; i <m.vertices.size(); i++) {
         std::swap(m.vertices[i][1], m.vertices[i][2]);
-        m.vertices[i][2] += 22;
+        m.vertices[i][2] = -m.vertices[i][2];
+        m.vertices[i][2] += 10;
         m.vertices[i][1] -= 10;
     }
     for (int i = 0; i <m.normals.size(); i++) {
         std::swap(m.normals[i][1], m.normals[i][2]);
     }
 
-    m.buildBB();
+    // m.buildBB();
+    m.buildBVH(m.BVH, 0, m.indices.size());
+
 
     scene.objects.push_back(&lightBall);
-    // scene.objects.push_back(&S1);
-    // scene.objects.push_back(&S2);
-    // scene.objects.push_back(&S3);
+    scene.objects.push_back(&S1);
+    scene.objects.push_back(&S2);
+    scene.objects.push_back(&S3);
     scene.objects.push_back(&floor);
     scene.objects.push_back(&leftWall);
     scene.objects.push_back(&rightWall);
     scene.objects.push_back(&backgroundWall);
     scene.objects.push_back(&frontWall);
     scene.objects.push_back(&ceiling);
+    // scene.objects.push_back(&m);
 
     // camera angle in rad
     double fov = 60*M_PI/180;
 
-    int numberOfRays = 1;
+    int numberOfRays = 100;
 
     std::vector<unsigned char> image(W*H * 3, 0);
 
-#pragma omp parallel for schedule(dynamic, 1)
+    int counter = 0;
+
     for (int i = 0; i < H; i++) {
         for (int j = 0; j < W; j++) {
-
             Vector color(0, 0, 0);
             for (int k = 0; k < numberOfRays; k++) {
                 double u1 = uniform(engine);
@@ -92,8 +99,6 @@ int main() {
                 double x3 = 0.01*cos(2*M_PI*u1)*sqrt(-2 * log(u2));
                 double x4 = 0.01*sin(2*M_PI*u1)*sqrt(-2 * log(u2));
 
-
-
                 // create ray from pixel coordinates
                 Vector u(j - W/2 + x2 + 0.5, i - H/2 + x1 + 0.5, -W/(2.*tan(fov/2)));
                 u = u.getNormalized();
@@ -102,6 +107,7 @@ int main() {
                 Vector uprime = (target - Cprim).getNormalized();
 
                 Ray r(Cprim, uprime);
+
                 color += scene.getColor(r, 0, false);
             }
             color = color/numberOfRays;
@@ -112,6 +118,11 @@ int main() {
             image[((H - i - 1)*W + j)* 3 + 0] = std::min(255.0, pow(color[0], 1/gamma));
             image[((H - i - 1)*W + j)* 3 + 1] = std::min(255.0, pow(color[1], 1/gamma));
             image[((H - i - 1)*W + j)* 3 + 2] = std::min(255.0, pow(color[2], 1/gamma));
+
+            if (counter % 1000 == 0) {
+                std::cout << counter << " / " << H*W << std::endl;
+            }
+            counter++;
         }
     }
     stbi_write_png("image9_dog.png", W, H, 3, &image[0], 0);
